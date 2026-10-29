@@ -1,0 +1,17 @@
+# Control port only: this container never proxies client traffic. Every onion
+# service is added at runtime over the control port (ADD_ONION) and published to
+# the caddy container, which routes by Host header.
+#
+# Alpine's tor package creates the `tor` user and owns /var/lib/tor; a fresh named
+# volume inherits that ownership, so drop privileges instead of fighting it.
+User tor
+SocksPort 0
+ControlPort 0.0.0.0:9051
+CookieAuthentication 1
+DataDirectory /var/lib/tor
+Log notice stdout
+SafeLogging 1
+
+# If direct connections to relays are blocked on your network, route outbound
+# traffic through a SOCKS5/HTTP proxy. A clash/mihomo "mixed" port works:
+#Socks5Proxy 127.0.0.1:7890

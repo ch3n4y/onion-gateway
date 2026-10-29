@@ -1,0 +1,47 @@
+name: onion-gateway
+
+services:
+  tor:
+    build: ./tor
+    restart: unless-stopped
+    volumes:
+      - tor_data:/var/lib/tor
+
+  caddy:
+    build: ./caddy
+    restart: unless-stopped
+    depends_on:
+      - tor
+
+  # API only. Frontend is a separate container (frontend/) talking to it over
+  # /api on the compose network.
+  panel:
+    build: .
+    restart: unless-stopped
+    environment:
+      PANEL_PASSWORD: "${PANEL_PASSWORD:?set PANEL_PASSWORD in .env}"
+      SESSION_KEY: "${SESSION_KEY:-}"
+      TOR_CONTROL_ADDR: "tor:9051"
+      TOR_COOKIE_PATH: "/tor-data/control_auth_cookie"
+      CADDY_ADMIN_URL: "http://caddy:2019"
+      ONION_TARGET: "caddy:8080"
+      VANITY_WORKERS: "${VANITY_WORKERS:-0}"
+    volumes:
+      - panel_data:/data
+      - tor_data:/tor-data:ro
+    depends_on:
+      - tor
+      - caddy
+
+  web:
+    build: ./frontend
+    restart: unless-stopped
+    # Set PANEL_BIND=127.0.0.1 to keep the panel off the LAN.
+    ports:
+      - "${PANEL_BIND:-0.0.0.0}:${PANEL_PORT:-19282}:80"
+    depends_on:
+      - panel
+
+volumes:
+  tor_data:
+  panel_data:

@@ -1,0 +1,12 @@
+{
+	# Admin API must be reachable from the panel container, hence 0.0.0.0 (never
+	# publish this port). The panel POSTs its own config, which keeps this listen
+	# address.
+	admin 0.0.0.0:2019
+	auto_https off
+	persist_config off
+}
+
+:8080 {
+	respond "onion-gateway" 404
+}

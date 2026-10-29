@@ -1,0 +1,17 @@
+# local / private
+.env
+.env.*
+!.env.example
+HANDOFF.md
+pasted/
+browser-screenshot-*
+docker-compose.override.yml
+tor/torrc.local
+*.log
+.DS_Store
+
+# build output
+oniongateway
+/onion-gateway
+frontend/node_modules/
+frontend/dist/
